@@ -1,0 +1,29 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.0",
+  "body": [
+    {
+      "type": "Image",
+      "url": "https://as1.ftcdn.net/v2/jpg/01/25/57/92/1000_F_125579217_HL9SYmJR8KzVZ5Jfddr4BPyD3QxSSHtZ.jpg",
+      "size": "large"
+    },
+    {
+      "type": "TextBlock",
+      "spacing": "medium",
+      "size": "default",
+      "weight": "bolder",
+      "text": "Hello there! Welcome to our Cinema!",
+      "wrap": true,
+      "maxLines": 0
+    },
+    {
+      "type": "TextBlock",
+      "size": "default",
+      "isSubtle": true,
+      "text": "_I'm your virtual assistant, I'm here to help you with any information about our movies, information about our tickets or for booking a ticket. Let me know if you need anything!_",
+      "wrap": true,
+      "maxLines": 0
+    }
+  ]
+}
