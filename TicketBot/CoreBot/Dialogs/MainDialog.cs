@@ -16,14 +16,14 @@ namespace CoreBot.Dialogs
         private readonly ILogger _logger;
         private readonly TicketBotCLURecognizer _cluRecognizer;
 
-        public MainDialog(LookPlayingMoviesDialog lookOpeningHoursDialog, BookTableDialog bookTableDialog, TicketBotCLURecognizer cluRecognizer, ILogger<MainDialog> logger)
+        public MainDialog(CheckScheduleDialog checkScheduleDialog, BookTicketDialog bookTicketDialog, TicketBotCLURecognizer cluRecognizer, ILogger<MainDialog> logger)
             : base(nameof(MainDialog))
         {
             _logger = logger;
             _cluRecognizer = cluRecognizer;
 
             // Add sub-dialogs
-            AddDialog(lookOpeningHoursDialog);
+            AddDialog(checkScheduleDialog);
             AddDialog(bookTicketDialog);
 
             // Add prompts
@@ -45,7 +45,7 @@ namespace CoreBot.Dialogs
 
         private async Task<DialogTurnResult> ShowOptionsStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var options = new List<string> { "Look Opening Hours", "Book a Ticket", "Exit" };
+            var options = new List<string> { "Check the schedule", "Book a Ticket", "Exit" };
 
             var promptOptions = new PromptOptions
             {
@@ -75,13 +75,17 @@ namespace CoreBot.Dialogs
 			switch (choice)
             {
                 case "Look Playing Movies":
-                    // Start the LookPlayingMoviesDialog
-                    return await stepContext.BeginDialogAsync(nameof(LookPlayingMoviesDialog), null, cancellationToken);
+                    // Start the CheckScheduleDialog
+                    return await stepContext.BeginDialogAsync(nameof(CheckScheduleDialog), null, cancellationToken);
 
                 case "Book a Ticket":
                     // Start the BookTableDialog
-                    return await stepContext.BeginDialogAsync(nameof(BookTicketDialog), new BookTicketDetails(), cancellationToken);
+                    return await stepContext.BeginDialogAsync(nameof(BookTicketDialog), null, cancellationToken);
 
+                case "Rate a Movie":
+                    //Start the RatingDialog
+                    return await stepContext.BeginDialogAsync(nameof(RatingDialog), null, cancellationToken);
+                
                 case "Exit":
                     await stepContext.Context.SendActivityAsync(MessageFactory.Text("Goodbye!"), cancellationToken);
                     return await stepContext.EndDialogAsync(null, cancellationToken);

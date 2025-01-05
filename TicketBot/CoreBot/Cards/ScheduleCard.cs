@@ -3,7 +3,11 @@ using CoreBot.Models;
 using Microsoft.Bot.Schema;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System;
+using Microsoft.Bot.Schema;
+using CoreBot.Models;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace CoreBot.Cards
 {
@@ -15,45 +19,45 @@ namespace CoreBot.Cards
             {
                 Body = new List<AdaptiveElement>
                 {
-                    // Title TextBlock
+					new AdaptiveColumnSet
+					{
+						Columns = new List<AdaptiveColumn>
+						{
+							new AdaptiveColumn
+							{
+								Width = "stretch",
+								Items = new List<AdaptiveElement>
+								{
                     new AdaptiveTextBlock
                     {
-                        Text = "Schedules",
+										Text = "Schedule",
                         Weight = AdaptiveTextWeight.Bolder,
                         Size = AdaptiveTextSize.Large
+									}
+								}
+							}
+						}
                     },
                     // Subtitle TextBlock
                     new AdaptiveTextBlock
                     {
-                        Text = "Choose a Schedule:",
-                        Wrap = true
+						Text = $"This is the schedule",
+						Weight = AdaptiveTextWeight.Default,
+						Size = AdaptiveTextSize.Medium,
+						Spacing = AdaptiveSpacing.Large
                     },
-
-                    new AdaptiveChoiceSetInput
+					new AdaptiveContainer {
+						Items = schedules.Select(schedule => new AdaptiveTextBlock
                     {
-                        Id = "scheduleChoice",
-                        Value = schedules[0].Id,
-                        Style = AdaptiveChoiceInputStyle.Compact,
-                        Choices = schedules.Select(schedule => new AdaptiveChoice
-                        {
-                            Title = schedule.Date,
-                            Value = schedule.Id
-                        }).ToList()
-                    }
-                },
-                Actions = new List<AdaptiveAction>
-                {
-                    // Submit Action
-                    new AdaptiveSubmitAction
-                    {
-                        Title = "Show Schedules",
-                        Data = new { action = "showSchedules" }
+							Text = $"• {schedule.Movie.Name} {schedule.MovieHall.Name} - _{schedule.MovieHall.Location}_",
+							Wrap = true,
+							Spacing = AdaptiveSpacing.None
+						}).Cast<AdaptiveElement>().ToList()
                     }
                 }
             };
 
-            // Create an attachment
-            var adaptiveCardAttachment = new Attachment
+			var adaptiveCardAttachment = new Attachment()
             {
                 ContentType = "application/vnd.microsoft.card.adaptive",
                 Content = JObject.FromObject(card)
@@ -61,5 +65,7 @@ namespace CoreBot.Cards
 
             return adaptiveCardAttachment;
         }
+
     }
 }
+
