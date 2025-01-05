@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace TicketBot.DAL.Models
 {
@@ -10,11 +11,14 @@ namespace TicketBot.DAL.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        public string CustomerName { get; set; } // Name of the person ordering the ticket
+        public string CustomerName { get; set; }
+        public string Phone { get; set; }
+        public string Email { get; set; }
 
-        public int ScheduleId { get; set; } // Reference to the scheduled movie
+        public int ScheduleId { get; set; }
+        [JsonIgnore]
         public Schedule Schedule { get; set; }
 
-        public DateTime OrderDate { get; set; } = DateTime.UtcNow; // Timestamp for the ticket order
+        public DateTime OrderDate { get; set; } = DateTime.UtcNow;
     }
 }

@@ -24,7 +24,7 @@ namespace TicketBot.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ScheduleDto>>> GetSchedules()
         {
-            var schedules = await _scheduleRepository.GetAllAsync();
+            var schedules = await _scheduleRepository.GetAllAsync(d => d.Tickets, m => m.Movie, h => h.MovieHall);
             var scheduleDtos = _mapper.Map<IEnumerable<ScheduleDto>>(schedules);
             return Ok(scheduleDtos);
         }
@@ -33,7 +33,7 @@ namespace TicketBot.API.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ScheduleDto>> GetSchedule(int id)
         {
-            var schedule = await _scheduleRepository.GetByIdAsync(id);
+            var schedule = await _scheduleRepository.GetByIDAsync(id, d => d.Tickets, m => m.Movie, h => h.MovieHall);
             if (schedule == null)
             {
                 return NotFound();
@@ -71,7 +71,7 @@ namespace TicketBot.API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (await _scheduleRepository.GetByIdAsync(id) == null)
+                if (await _scheduleRepository.GetByIDAsync(id) == null)
                 {
                     return NotFound();
                 }
@@ -86,7 +86,7 @@ namespace TicketBot.API.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteSchedule(int id)
         {
-            var schedule = await _scheduleRepository.GetByIdAsync(id);
+            var schedule = await _scheduleRepository.GetByIDAsync(id);
             if (schedule == null)
             {
                 return NotFound();

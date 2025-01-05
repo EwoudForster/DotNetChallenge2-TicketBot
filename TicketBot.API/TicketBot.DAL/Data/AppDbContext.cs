@@ -14,6 +14,12 @@ namespace TicketBot.DAL.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            modelBuilder.Entity<Movie>().ToTable("Movie");
+            modelBuilder.Entity<MovieHall>().ToTable("MovieHall");
+            modelBuilder.Entity<Schedule>().ToTable("Schedule");
+            modelBuilder.Entity<Ticket>().ToTable("Ticket");
+
             // Configure relationships and constraints
             modelBuilder.Entity<Schedule>()
                 .HasOne(s => s.Movie)
@@ -30,7 +36,7 @@ namespace TicketBot.DAL.Data
             modelBuilder.Entity<Ticket>()
                 .HasOne(t => t.Schedule)
                 .WithMany(s => s.Tickets)
-                .HasForeignKey("ScheduleId")
+                .HasForeignKey(s => s.ScheduleId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);
