@@ -1,0 +1,6 @@
+@TicketBot.API_HostAddress = http://localhost:5004
+
+GET {{TicketBot.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

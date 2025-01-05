@@ -1,5 +1,6 @@
 ﻿// Generated with EchoBot .NET Template version v4.22.0
 
+using FirstBot.Helpers;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 using System.Collections.Generic;
@@ -18,12 +19,13 @@ namespace EchoBot.Bots
 
         protected override async Task OnMembersAddedAsync(IList<ChannelAccount> membersAdded, ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
         {
-            var welcomeText = "Hello and welcome!";
             foreach (var member in membersAdded)
             {
                 if (member.Id != turnContext.Activity.Recipient.Id)
                 {
-                    await turnContext.SendActivityAsync(MessageFactory.Text(welcomeText, welcomeText), cancellationToken);
+                    var welcomeCard = CardHelper.CreateCardAttachment("welcomeCard");
+                    var response = MessageFactory.Attachment(welcomeCard);
+                    await turnContext.SendActivityAsync(response, cancellationToken);
                 }
             }
         }
