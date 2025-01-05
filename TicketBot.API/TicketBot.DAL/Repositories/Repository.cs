@@ -27,26 +27,30 @@ namespace TicketBot.DAL.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<T?> GetByIdAsync(int id, params Expression<Func<T, object>>[] includes)
+        public async Task<T> GetByIDAsync(int id, params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = _dbSet;
 
             foreach (var include in includes)
-            {
                 query = query.Include(include);
-            }
 
-            return await query.FirstOrDefaultAsync(entity => EF.Property<int>(entity, "Id") == id);
+            return await query.FirstOrDefaultAsync(e => EF.Property<int>(e, "Id") == id);
         }
 
-        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes)
+        public async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> filter = null, Func<IQueryable<T>,
+                                                    IOrderedQueryable<T>> orderBy = null,
+                                                    params Expression<Func<T, object>>[] includes)
         {
-            IQueryable<T> query = _dbSet.Where(predicate);
+            IQueryable<T> query = _dbSet;
 
-            foreach (var include in includes)
-            {
+            foreach (Expression<Func<T, object>> include in includes)
                 query = query.Include(include);
-            }
+
+            if (filter != null)
+                query = query.Where(filter);
+
+            if (orderBy != null)
+                query = orderBy(query);
 
             return await query.ToListAsync();
         }
@@ -69,6 +73,26 @@ namespace TicketBot.DAL.Repositories
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
+        }
+
+        public IEnumerable<T> Get(
+                Expression<Func<T, bool>> filter = null,
+                Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+                params Expression<Func<T, object>>[] includes)
+
+        {
+            IQueryable<T> query = _dbSet;
+
+            foreach (Expression<Func<T, object>> include in includes)
+                query = query.Include(include);
+
+            if (filter != null)
+                query = query.Where(filter);
+
+            if (orderBy != null)
+                query = orderBy(query);
+
+            return query.ToList();
         }
     }
 }

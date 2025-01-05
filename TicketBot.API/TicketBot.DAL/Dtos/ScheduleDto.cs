@@ -1,7 +1,12 @@
-﻿namespace TicketBot.DAL.Dtos
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace TicketBot.DAL.Dtos
 {
     public class ScheduleDto
     {
+        [Key]
+        [Column("Id")]
         public int Id { get; set; }
         public int MovieHallId { get; set; }
         public MovieHallDto MovieHall { get; set; }

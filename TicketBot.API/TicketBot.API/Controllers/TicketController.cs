@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TicketBot.DAL.Dtos;
 using TicketBot.DAL.Models;
 using TicketBot.DAL.Repositories;
@@ -10,10 +11,10 @@ namespace TicketBot.API.Controllers
     [ApiController]
     public class TicketController : ControllerBase
     {
-        private readonly TicketRepository _ticketRepository;
+        private readonly ITicketRepository _ticketRepository;
         private readonly IMapper _mapper;
 
-        public TicketController(TicketRepository ticketRepository, IMapper mapper)
+        public TicketController(ITicketRepository ticketRepository, IMapper mapper)
         {
             _ticketRepository = ticketRepository;
             _mapper = mapper;
@@ -23,7 +24,7 @@ namespace TicketBot.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TicketDto>>> GetTickets()
         {
-            var tickets = await _ticketRepository.GetAllWithIncludesAsync();
+            var tickets = await _ticketRepository.GetAllAsync(d => d.Schedule);
             var ticketDtos = _mapper.Map<IEnumerable<TicketDto>>(tickets);
             return Ok(ticketDtos);
         }
@@ -32,7 +33,7 @@ namespace TicketBot.API.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<TicketDto>> GetTicket(int id)
         {
-            var ticket = await _ticketRepository.GetByIdAsync(id);
+            var ticket = await _ticketRepository.GetByIDAsync(id, d => d.Schedule);
             if (ticket == null)
             {
                 return NotFound();
@@ -44,10 +45,8 @@ namespace TicketBot.API.Controllers
 
         // POST: api/Tickets
         [HttpPost]
-        public async Task<ActionResult<TicketDto>> CreateTicket(CreateTicketDto createTicketDto)
+        public async Task<ActionResult<TicketDto>> PostTicket(Ticket ticket)
         {
-            var ticket = _mapper.Map<Ticket>(createTicketDto);
-
             await _ticketRepository.AddAsync(ticket);
             await _ticketRepository.SaveChangesAsync();
 
@@ -55,11 +54,39 @@ namespace TicketBot.API.Controllers
             return CreatedAtAction(nameof(GetTicket), new { id = ticket.Id }, ticketDto);
         }
 
+        // PUT: api/Tickets/{id}
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> PutTicket(int id, Ticket ticket)
+        {
+            if (id != ticket.Id)
+            {
+                return BadRequest();
+            }
+
+            _ticketRepository.Update(ticket);
+
+            try
+            {
+                await _ticketRepository.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (await _ticketRepository.GetByIDAsync(id) == null)
+                {
+                    return NotFound();
+                }
+
+                throw;
+            }
+
+            return NoContent();
+        }
+
         // DELETE: api/Tickets/{id}
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteTicket(int id)
         {
-            var ticket = await _ticketRepository.GetByIdAsync(id);
+            var ticket = await _ticketRepository.GetByIDAsync(id);
             if (ticket == null)
             {
                 return NotFound();

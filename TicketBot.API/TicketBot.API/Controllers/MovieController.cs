@@ -24,7 +24,7 @@ namespace TicketBot.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MovieDto>>> GetMovies()
         {
-            var movies = await _movieRepository.GetAllAsync();
+            var movies = await _movieRepository.GetAllAsync(d => d.Schedules);
             var movieDtos = _mapper.Map<IEnumerable<MovieDto>>(movies);
             return Ok(movieDtos);
         }
@@ -33,7 +33,7 @@ namespace TicketBot.API.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<MovieDto>> GetMovie(int id)
         {
-            var movie = await _movieRepository.GetByIdAsync(id);
+            var movie = await _movieRepository.GetByIDAsync(id, d => d.Schedules);
             if (movie == null)
             {
                 return NotFound();
@@ -71,7 +71,7 @@ namespace TicketBot.API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (await _movieRepository.GetByIdAsync(id) == null)
+                if (await _movieRepository.GetByIDAsync(id) == null)
                 {
                     return NotFound();
                 }
@@ -86,7 +86,7 @@ namespace TicketBot.API.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteMovie(int id)
         {
-            var movie = await _movieRepository.GetByIdAsync(id);
+            var movie = await _movieRepository.GetByIDAsync(id);
             if (movie == null)
             {
                 return NotFound();
