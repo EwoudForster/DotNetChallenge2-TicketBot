@@ -8,7 +8,7 @@ namespace CoreBot.Services
 {
     public static class ApiService<T>
     {
-        private static readonly string BASE_URL = "https://ticketbotapi.azure-api.net/api";
+        private static readonly string BASE_URL = "https://ticketbotapi.azure-api.net/api/";
         static HttpClient client = new HttpClient() { Timeout = TimeSpan.FromSeconds(60) };
 
         public static async Task<T> GetAsync(string endPoint)
