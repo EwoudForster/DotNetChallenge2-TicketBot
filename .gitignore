@@ -80,5 +80,3 @@ desktop.ini
 
 # Secrets and environment variables
 *.env
-appsettings.json
-appsettings.*.json

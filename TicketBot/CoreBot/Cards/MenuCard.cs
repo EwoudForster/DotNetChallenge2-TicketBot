@@ -46,7 +46,7 @@ namespace CoreBot.Cards
                                 {
                                     new AdaptiveImage
                                     {
-                                        Url = new Uri("https://koenvangeel.pythonanywhere.com/static/restaurant.jpg"),
+                                        Url = new Uri("https://as1.ftcdn.net/v2/jpg/01/25/57/92/1000_F_125579217_HL9SYmJR8KzVZ5Jfddr4BPyD3QxSSHtZ.jpg"),
                                         Size = AdaptiveImageSize.Medium,
                                         Style = AdaptiveImageStyle.Default
                                     }

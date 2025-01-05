@@ -1,4 +1,5 @@
 ﻿using AdaptiveCards;
+using CoreBot.Models;
 using Microsoft.Bot.Schema;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
@@ -6,9 +7,9 @@ using System.Linq;
 
 namespace CoreBot.Cards
 {
-    public class CategoryCard
+    public class MovieCard
     {
-        public static Attachment CreateCardAttachment(List<Category> categories)
+        public static Attachment CreateCardAttachment(List<Movie> movies)
         {
             var card = new AdaptiveCard(new AdaptiveSchemaVersion(1, 0))
             {
@@ -17,26 +18,26 @@ namespace CoreBot.Cards
                     // Title TextBlock
                     new AdaptiveTextBlock
                     {
-                        Text = "Restaurant Menu",
+                        Text = "Movies",
                         Weight = AdaptiveTextWeight.Bolder,
                         Size = AdaptiveTextSize.Large
                     },
                     // Subtitle TextBlock
                     new AdaptiveTextBlock
                     {
-                        Text = "Choose a category:",
+                        Text = "Choose a Movie:",
                         Wrap = true
                     },
-                    // ChoiceSet for categories
+
                     new AdaptiveChoiceSetInput
                     {
-                        Id = "categoryChoice",
-                        Value = categories[0].Code,
+                        Id = "movieChoice",
+                        Value = movies[0].Id,
                         Style = AdaptiveChoiceInputStyle.Compact,
-                        Choices = categories.Select(category => new AdaptiveChoice
+                        Choices = movies.Select(category => new AdaptiveChoice
                         {
                             Title = category.Name,
-                            Value = category.Code
+                            Value = category.Id
                         }).ToList()
                     }
                 },
@@ -45,8 +46,8 @@ namespace CoreBot.Cards
                     // Submit Action
                     new AdaptiveSubmitAction
                     {
-                        Title = "Show Menu",
-                        Data = new { action = "showMenu" }
+                        Title = "Show Movies",
+                        Data = new { action = "showMovies" }
                     }
                 }
             };
