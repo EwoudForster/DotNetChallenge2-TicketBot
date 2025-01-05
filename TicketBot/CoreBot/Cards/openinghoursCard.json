@@ -18,7 +18,7 @@
             },
             {
               "type": "TextBlock",
-              "text": "Opening hours",
+              "text": "Playing movies",
               "weight": "Bolder",
               "spacing": "None"
             }

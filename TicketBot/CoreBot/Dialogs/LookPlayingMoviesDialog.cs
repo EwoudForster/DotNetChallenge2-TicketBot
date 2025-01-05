@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace CoreBot.Dialogs
 {
-    public class LookOpeningHoursDialog : CancelAndHelpDialog
+    public class LookPlayingMoviesDialog : CancelAndHelpDialog
     {
-        public LookOpeningHoursDialog()
-            : base(nameof(LookOpeningHoursDialog))
+        public LookPlayingMoviesDialog()
+            : base(nameof(LookPlayingMoviesDialog))
         {
 
             var waterfallSteps = new WaterfallStep[]

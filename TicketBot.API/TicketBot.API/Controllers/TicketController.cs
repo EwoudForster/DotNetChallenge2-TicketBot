@@ -10,10 +10,10 @@ namespace TicketBot.API.Controllers
     [ApiController]
     public class TicketController : ControllerBase
     {
-        private readonly ITicketRepository _ticketRepository;
+        private readonly TicketRepository _ticketRepository;
         private readonly IMapper _mapper;
 
-        public TicketController(ITicketRepository ticketRepository, IMapper mapper)
+        public TicketController(TicketRepository ticketRepository, IMapper mapper)
         {
             _ticketRepository = ticketRepository;
             _mapper = mapper;
@@ -23,7 +23,7 @@ namespace TicketBot.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TicketDto>>> GetTickets()
         {
-            var tickets = await _ticketRepository.GetAllAsync();
+            var tickets = await _ticketRepository.GetAllWithIncludesAsync();
             var ticketDtos = _mapper.Map<IEnumerable<TicketDto>>(tickets);
             return Ok(ticketDtos);
         }
