@@ -45,7 +45,7 @@ namespace CoreBot
             services.AddSingleton<MainDialog>();
 
             // The MainDialog that will be run by the bot.
-            services.AddSingleton<BookTableDialog>();
+            services.AddSingleton<BookTicketDialog>();
 
             // The MainDialog that will be run by the bot.
             services.AddSingleton<LookOpeningHoursDialog>();

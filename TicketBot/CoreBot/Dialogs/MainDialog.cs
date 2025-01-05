@@ -1,4 +1,4 @@
-﻿using CoreBot.DialogDetails;
+﻿using CoreBot.Models;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Choices;
@@ -13,7 +13,7 @@ namespace CoreBot.Dialogs
     {
         private readonly ILogger _logger;
 
-        public MainDialog(LookOpeningHoursDialog lookOpeningHoursDialog, BookTableDialog bookTableDialog, ILogger<MainDialog> logger)
+        public MainDialog(LookOpeningHoursDialog lookOpeningHoursDialog, BookTicketDialog bookTableDialog, ILogger<MainDialog> logger)
             : base(nameof(MainDialog))
         {
             _logger = logger;
@@ -41,7 +41,7 @@ namespace CoreBot.Dialogs
 
         private async Task<DialogTurnResult> ShowOptionsStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var options = new List<string> { "Look Opening Hours", "Book a Table", "Exit" };
+            var options = new List<string> { "Look Opening Hours", "Book a Ticket", "Exit" };
 
             var promptOptions = new PromptOptions
             {
@@ -63,9 +63,9 @@ namespace CoreBot.Dialogs
                     // Start the LookOpeningHoursDialog
                     return await stepContext.BeginDialogAsync(nameof(LookOpeningHoursDialog), null, cancellationToken);
 
-                case "Book a Table":
+                case "Book a Ticket":
                     // Start the BookTableDialog
-                    return await stepContext.BeginDialogAsync(nameof(BookTableDialog), new BookTableDetails(), cancellationToken);
+                    return await stepContext.BeginDialogAsync(nameof(BookTicketDialog), new BookTicketDetails(), cancellationToken);
 
                 case "Exit":
                     await stepContext.Context.SendActivityAsync(MessageFactory.Text("Goodbye!"), cancellationToken);

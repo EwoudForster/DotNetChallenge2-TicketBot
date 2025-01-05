@@ -21,7 +21,7 @@
       "type": "TextBlock",
       "size": "default",
       "isSubtle": true,
-      "text": "_I'm your virtual assistant, I'm here to help you with any information about our movies, information about our tickets or for booking a ticket. Let me know if you need anything!_",
+      "text": "_I'm your virtual assistant, I'm here to help you with any information about our schedules, information about our tickets or for booking a ticket. Let me know if you need anything!_",
       "wrap": true,
       "maxLines": 0
     }

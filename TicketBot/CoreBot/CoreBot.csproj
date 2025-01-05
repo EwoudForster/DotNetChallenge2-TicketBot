@@ -6,12 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Cards\pricemovieCard.json" />
+    <Content Remove="Cards\pricescheduleCard.json" />
     <Content Remove="Cards\welcomeCard.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Cards\pricemovieCard.json" />
   </ItemGroup>
 
   <ItemGroup>
