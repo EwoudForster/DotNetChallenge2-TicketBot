@@ -66,10 +66,10 @@ namespace CoreBot.Dialogs
 				var result = await _cluRecognizer.RecognizeAsync(stepContext.Context, cancellationToken);
 				var topIntent = result.GetTopScoringIntent();
 
-				if (topIntent.intent == TicketBotModel.Intent.BookTicket.ToString())
-				{
-					return await stepContext.BeginDialogAsync(nameof(BookTableDialog), null, cancellationToken);
-				}
+				//if (topIntent.intent == TicketBotModel.Intent.BookTicket.ToString())
+				//{
+				//	return await stepContext.BeginDialogAsync(nameof(BookTableDialog), null, cancellationToken);
+				//}
 			}
 
 			switch (choice)

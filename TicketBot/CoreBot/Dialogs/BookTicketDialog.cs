@@ -179,6 +179,7 @@ namespace CoreBot.Dialogs
 
 			await stepContext.Context.SendActivityAsync(MessageFactory.Attachment(ticketCard), cancellationToken);
 
-        }
+			return await stepContext.EndDialogAsync(cancellationToken);
+		}
     }
 }
