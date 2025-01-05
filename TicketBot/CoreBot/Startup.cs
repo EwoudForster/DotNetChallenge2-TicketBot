@@ -47,8 +47,8 @@ namespace CoreBot
             // The MainDialog that will be run by the bot.
             services.AddSingleton<BookTicketDialog>();
 
-            // The MainDialog that will be run by the bot.
-            services.AddSingleton<LookOpeningHoursDialog>();
+            services.AddSingleton<CheckScheduleDialog>();
+            services.AddSingleton<RatingDialog>();
 
             // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
             services.AddTransient<IBot, DialogAndWelcomeBot<MainDialog>>();
