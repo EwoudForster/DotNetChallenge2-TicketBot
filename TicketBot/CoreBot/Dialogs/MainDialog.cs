@@ -45,7 +45,7 @@ namespace CoreBot.Dialogs
 
         private async Task<DialogTurnResult> ShowOptionsStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var options = new List<string> { "Check the schedule", "Book a Ticket", "Exit" };
+            var options = new List<string> { "Check the schedule", "Book a Ticket", "Rate a Movie", "Exit" };
 
             var promptOptions = new PromptOptions
             {
@@ -61,20 +61,20 @@ namespace CoreBot.Dialogs
         {
             var choice = ((FoundChoice)stepContext.Result).Value;
 
-			if (_cluRecognizer.IsConfigured)
-	        {
-				var result = await _cluRecognizer.RecognizeAsync(stepContext.Context, cancellationToken);
-				var topIntent = result.GetTopScoringIntent();
+			//if (_cluRecognizer.IsConfigured)
+	  //      {
+			//	var result = await _cluRecognizer.RecognizeAsync(stepContext.Context, cancellationToken);
+			//	var topIntent = result.GetTopScoringIntent();
 
-				//if (topIntent.intent == TicketBotModel.Intent.BookTicket.ToString())
-				//{
-				//	return await stepContext.BeginDialogAsync(nameof(BookTableDialog), null, cancellationToken);
-				//}
-			}
+   //             if (topIntent.intent == TicketBotModel.Intent.BookTicket.ToString())
+   //             {
+   //                 return await stepContext.BeginDialogAsync(nameof(BookTableDialog), null, cancellationToken);
+   //             }
+   //         }
 
 			switch (choice)
             {
-                case "Look Playing Movies":
+                case "Check the schedule":
                     // Start the CheckScheduleDialog
                     return await stepContext.BeginDialogAsync(nameof(CheckScheduleDialog), null, cancellationToken);
 
