@@ -1,4 +1,5 @@
-﻿using CoreBot.DialogDetails;
+﻿using CoreBot.CognitiveModels;
+using CoreBot.DialogDetails;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Choices;
@@ -12,15 +13,17 @@ namespace CoreBot.Dialogs
     public class MainDialog : ComponentDialog
     {
         private readonly ILogger _logger;
+        private readonly TicketBotCLURecognizer _cluRecognizer;
 
-        public MainDialog(LookOpeningHoursDialog lookOpeningHoursDialog, BookTableDialog bookTableDialog, ILogger<MainDialog> logger)
+        public MainDialog(LookPlayingMoviesDialog lookOpeningHoursDialog, BookTableDialog bookTableDialog, TicketBotCLURecognizer cluRecognizer, ILogger<MainDialog> logger)
             : base(nameof(MainDialog))
         {
             _logger = logger;
+            _cluRecognizer = cluRecognizer;
 
             // Add sub-dialogs
             AddDialog(lookOpeningHoursDialog);
-            AddDialog(bookTableDialog);
+            AddDialog(bookTicketDialog);
 
             // Add prompts
             AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
@@ -57,11 +60,22 @@ namespace CoreBot.Dialogs
         {
             var choice = ((FoundChoice)stepContext.Result).Value;
 
-            switch (choice)
+			if (_cluRecognizer.IsConfigured)
+	        {
+				var result = await _cluRecognizer.RecognizeAsync(stepContext.Context, cancellationToken);
+				var topIntent = result.GetTopScoringIntent();
+
+				if (topIntent.intent == TicketBotModel.Intent.BookTicket.ToString())
+				{
+					return await stepContext.BeginDialogAsync(nameof(BookTableDialog), null, cancellationToken);
+				}
+			}
+
+			switch (choice)
             {
-                case "Look Opening Hours":
-                    // Start the LookOpeningHoursDialog
-                    return await stepContext.BeginDialogAsync(nameof(LookOpeningHoursDialog), null, cancellationToken);
+                case "Look Playing Movies":
+                    // Start the LookPlayingMoviesDialog
+                    return await stepContext.BeginDialogAsync(nameof(LookPlayingMoviesDialog), null, cancellationToken);
 
                 case "Book a Table":
                     // Start the BookTableDialog
