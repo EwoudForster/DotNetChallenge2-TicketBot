@@ -5,8 +5,12 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+//builder.Services.AddDbContext<BotDbContext>(options =>
+	//options.UseSqlite("Data Source=bot.db"));
+
 builder.Services.AddDbContext<BotDbContext>(options =>
-	options.UseSqlite("Data Source=bot.db"));
+	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 // Replace in-memory repositories with database repositories
 builder.Services.AddScoped<IMovieRepository, DatabaseMovieRepository>();

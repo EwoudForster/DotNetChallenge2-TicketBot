@@ -32,24 +32,24 @@ namespace TicketBotApi.Data
 				.HasForeignKey(s => s.MovieHallId)
 				.OnDelete(DeleteBehavior.Cascade);
 
-			// Optional: Seed Movies
+			// Seed Movies
 			modelBuilder.Entity<Movie>().HasData(
 				new Movie { Id = 1, Name = "Inception", Rating = 9 },
 				new Movie { Id = 2, Name = "The Matrix", Rating = 10 },
 				new Movie { Id = 3, Name = "Titanic", Rating = 8 }
 			);
 
-			// Optional: Seed MovieHalls
+			// Seed MovieHalls
 			modelBuilder.Entity<MovieHall>().HasData(
 				new MovieHall { Id = 1, Name = "Hall A" },
 				new MovieHall { Id = 2, Name = "Hall B" }
 			);
 
-			// Optional: Seed Schedules
+			// Seed Schedules with fixed DateTime values
 			modelBuilder.Entity<Schedule>().HasData(
-				new Schedule { Id = 1, MovieId = 1, MovieHallId = 1, Date = DateTime.Now.AddHours(2) },
-				new Schedule { Id = 2, MovieId = 2, MovieHallId = 2, Date = DateTime.Now.AddHours(4) },
-				new Schedule { Id = 3, MovieId = 3, MovieHallId = 1, Date = DateTime.Now.AddHours(6) }
+				new Schedule { Id = 1, MovieId = 1, MovieHallId = 1, Date = new DateTime(2025, 8, 26, 16, 25, 0) },
+				new Schedule { Id = 2, MovieId = 2, MovieHallId = 2, Date = new DateTime(2025, 8, 26, 18, 25, 0) },
+				new Schedule { Id = 3, MovieId = 3, MovieHallId = 1, Date = new DateTime(2025, 8, 26, 20, 25, 0) }
 			);
 		}
 	}
