@@ -3,7 +3,6 @@ using CoreBot.Services;
 using CoreBot.Models;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.Bot.Builder.Dialogs.Choices;
 using Microsoft.Bot.Schema;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,7 +16,6 @@ namespace CoreBot.Dialogs
 	{
 		public BookTicketDialog() : base(nameof(BookTicketDialog))
 		{
-			AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
 			AddDialog(new TextPrompt(nameof(TextPrompt)));
 
 			var waterfallSteps = new WaterfallStep[]
@@ -38,24 +36,27 @@ namespace CoreBot.Dialogs
 		private async Task<DialogTurnResult> AskMovieAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
 		{
 			var movies = await ApiService<List<Movie>>.GetAsync("/movies"); // API call
+			var movieNames = movies.Select(m => m.Name).ToList();
 
-			var choices = movies.Select(m => new Choice(m.Name)).ToList();
+			var movieCard = MoviesCard.CreateCardAttachment(movieNames);
+			await stepContext.Context.SendActivityAsync(MessageFactory.Attachment(movieCard), cancellationToken);
 
-			return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
-			{
-				Prompt = MessageFactory.Text("Please select a movie:"),
-				Choices = choices,
-				RetryPrompt = MessageFactory.Text("Sorry, I didn't understand. Please select a valid movie.")
-			}, cancellationToken);
+			return Dialog.EndOfTurn; // Wait for card submission
 		}
 
 		private async Task<DialogTurnResult> ProcessMovieSelectionAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
 		{
-			var selectedMovie = ((FoundChoice)stepContext.Result).Value;
-			stepContext.Values["selectedMovie"] = selectedMovie;
+			if (stepContext.Context.Activity.Value is not null)
+			{
+				var submission = stepContext.Context.Activity.Value as dynamic;
+				string selectedMovie = submission.selectedMovie;
+				stepContext.Values["selectedMovie"] = selectedMovie;
 
-			await stepContext.Context.SendActivityAsync(MessageFactory.Text($"You selected: {selectedMovie}"), cancellationToken);
-			return await stepContext.NextAsync(null, cancellationToken);
+				return await stepContext.NextAsync(null, cancellationToken);
+			}
+
+			await stepContext.Context.SendActivityAsync("⚠️ Please select a movie first.", cancellationToken: cancellationToken);
+			return await stepContext.ReplaceDialogAsync(nameof(BookTicketDialog), cancellationToken: cancellationToken);
 		}
 
 		private async Task<DialogTurnResult> AskHallAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
@@ -69,31 +70,33 @@ namespace CoreBot.Dialogs
 				.Distinct()
 				.ToList();
 
-			var choices = movieHalls.Select(h => new Choice(h)).ToList();
+			var hallCard = MovieHallsCard.CreateCardAttachment(movieHalls);
+			await stepContext.Context.SendActivityAsync(MessageFactory.Attachment(hallCard), cancellationToken);
 
-			return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
-			{
-				Prompt = MessageFactory.Text("Please select a movie hall:"),
-				Choices = choices,
-				RetryPrompt = MessageFactory.Text("Sorry, I didn't understand. Please select a valid hall.")
-			}, cancellationToken);
+			return Dialog.EndOfTurn; // Wait for card submission
 		}
 
 		private async Task<DialogTurnResult> ProcessHallSelectionAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
 		{
-			var selectedHall = ((FoundChoice)stepContext.Result).Value;
-			stepContext.Values["selectedMovieHall"] = selectedHall;
+			if (stepContext.Context.Activity.Value is not null)
+			{
+				var submission = stepContext.Context.Activity.Value as dynamic;
+				string selectedHall = submission.selectedHall;
+				stepContext.Values["selectedMovieHall"] = selectedHall;
 
-			await stepContext.Context.SendActivityAsync(MessageFactory.Text($"You selected hall: {selectedHall}"), cancellationToken);
-			return await stepContext.NextAsync(null, cancellationToken);
+				return await stepContext.NextAsync(null, cancellationToken);
+			}
+
+			await stepContext.Context.SendActivityAsync("⚠️ Please select a hall first.", cancellationToken: cancellationToken);
+			return await stepContext.ReplaceDialogAsync(nameof(BookTicketDialog), cancellationToken: cancellationToken);
 		}
 
 		private async Task<DialogTurnResult> AskNameAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
 		{
 			return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions
 			{
-				Prompt = MessageFactory.Text("Please enter your full name:"),
-				RetryPrompt = MessageFactory.Text("Name cannot be empty. Please enter your full name.")
+				Prompt = MessageFactory.Text("👤 Please enter your full name:"),
+				RetryPrompt = MessageFactory.Text("⚠️ Name cannot be empty. Please enter your full name.")
 			}, cancellationToken);
 		}
 
@@ -102,7 +105,6 @@ namespace CoreBot.Dialogs
 			var userName = (string)stepContext.Result;
 			stepContext.Values["userName"] = userName;
 
-			await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Hello, {userName}!"), cancellationToken);
 			return await stepContext.NextAsync(null, cancellationToken);
 		}
 
@@ -119,7 +121,7 @@ namespace CoreBot.Dialogs
 
 			if (schedule == null)
 			{
-				await stepContext.Context.SendActivityAsync(MessageFactory.Text("Sorry, no matching schedule found."), cancellationToken);
+				await stepContext.Context.SendActivityAsync(MessageFactory.Text("❌ Sorry, no matching schedule found."), cancellationToken);
 				return await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
 			}
 

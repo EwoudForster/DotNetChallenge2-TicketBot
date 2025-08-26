@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Bot.Schema;
 using CoreBot.Models;
+using AdaptiveCards;
 
 namespace CoreBot.Cards
 {
@@ -8,26 +9,54 @@ namespace CoreBot.Cards
 	{
 		public static Attachment CreateCardAttachment(List<Schedule> schedules)
 		{
-			var card = new AdaptiveCards.AdaptiveCard("1.3")
+			var card = new AdaptiveCard(new AdaptiveSchemaVersion(1, 3))
 			{
-				Body = new List<AdaptiveCards.AdaptiveElement>()
+				Body = new List<AdaptiveElement>()
 			};
 
 			foreach (var s in schedules)
 			{
-				// Old simple version:
-				// card.Body.Add(new AdaptiveCards.AdaptiveTextBlock($"{s.MovieName} - {s.Time}"));
-
-				// Updated version using new model
 				string movieName = s.Movie?.Name ?? "Unknown Movie";
 				string theaterName = s.MovieHall?.Name ?? "Unknown Theater";
-				string time = s.Date.ToString("HH:mm"); // Display just the time
-				card.Body.Add(new AdaptiveCards.AdaptiveTextBlock($"{movieName} - {theaterName} - {time}"));
+				string time = s.Date.ToString("HH:mm");
+
+				// Each schedule in its own container
+				var container = new AdaptiveContainer
+				{
+					Items = new List<AdaptiveElement>
+					{
+						new AdaptiveTextBlock
+						{
+							Text = $"🎬 {movieName}",
+							Weight = AdaptiveTextWeight.Bolder,
+							Size = AdaptiveTextSize.Medium,
+							Wrap = true
+						},
+						new AdaptiveTextBlock
+						{
+							Text = $"🏛️ {theaterName}   ⏰ {time}",
+							Weight = AdaptiveTextWeight.Default,
+							Size = AdaptiveTextSize.Small,
+							Color = AdaptiveTextColor.Attention,
+							Wrap = true,
+							Spacing = AdaptiveSpacing.Small
+						},
+						new AdaptiveTextBlock
+						{
+							Text = "─ ─ ─ ─ ─ ─ ─",
+							Color = AdaptiveTextColor.Accent,
+							Size = AdaptiveTextSize.Small,
+							Separator = true
+						}
+					}
+				};
+
+				card.Body.Add(container);
 			}
 
 			return new Attachment
 			{
-				ContentType = AdaptiveCards.AdaptiveCard.ContentType,
+				ContentType = AdaptiveCard.ContentType,
 				Content = card
 			};
 		}

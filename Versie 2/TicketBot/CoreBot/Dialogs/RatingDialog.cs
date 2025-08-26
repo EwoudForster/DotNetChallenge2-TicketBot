@@ -1,8 +1,8 @@
-﻿using CoreBot.Models;
+﻿using CoreBot.Cards;
+using CoreBot.Models;
 using CoreBot.Services;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.Bot.Builder.Dialogs.Choices;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -14,81 +14,87 @@ namespace CoreBot.Dialogs
 	{
 		public RatingDialog() : base(nameof(RatingDialog))
 		{
-			AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
-			AddDialog(new TextPrompt(nameof(TextPrompt)));
-
 			var waterfallSteps = new WaterfallStep[]
 			{
-				AskForMovieAsync,
+				ShowMoviesCardAsync,
 				ProcessMovieSelectionAsync,
-				AskRatingAsync,
-				ProcessRatingAsync
+				ShowRatingCardAsync,
+				ProcessRatingCardAsync
 			};
 
 			AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
 			InitialDialogId = nameof(WaterfallDialog);
 		}
 
-		private async Task<DialogTurnResult> AskForMovieAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+		private async Task<DialogTurnResult> ShowMoviesCardAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
 		{
-			var movies = await ApiService<List<Movie>>.GetAsync("/movies"); // API call
+			var movies = await ApiService<List<Movie>>.GetAsync("/movies");
+			var movieNames = movies.ConvertAll(m => m.Name);
 
-			var choices = movies.ConvertAll(m => new Choice(m.Name));
+			var card = MoviesCard.CreateCardAttachment(movieNames);
+			await stepContext.Context.SendActivityAsync(MessageFactory.Attachment(card), cancellationToken);
 
-			return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
-			{
-				Prompt = MessageFactory.Text("Please select a movie to rate:"),
-				Choices = choices,
-				RetryPrompt = MessageFactory.Text("Sorry, I didn't understand. Please select a valid movie.")
-			}, cancellationToken);
+			return Dialog.EndOfTurn; // wait for card submission
 		}
 
 		private async Task<DialogTurnResult> ProcessMovieSelectionAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
 		{
-			var selectedMovie = ((FoundChoice)stepContext.Result).Value;
+			var submission = stepContext.Context.Activity.Value as dynamic;
+			string selectedMovie = submission.selectedMovie;
 			stepContext.Values["selectedMovie"] = selectedMovie;
-
-			await stepContext.Context.SendActivityAsync(MessageFactory.Text($"You selected: {selectedMovie}"), cancellationToken);
 
 			return await stepContext.NextAsync(null, cancellationToken);
 		}
 
-		private async Task<DialogTurnResult> AskRatingAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+		private async Task<DialogTurnResult> ShowRatingCardAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
 		{
 			var movieName = (string)stepContext.Values["selectedMovie"];
+			var card = RatingCard.CreateCardAttachment(movieName);
 
-			return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions
-			{
-				Prompt = MessageFactory.Text($"Please give a rating for {movieName} (1-5):")
-			}, cancellationToken);
+			await stepContext.Context.SendActivityAsync(MessageFactory.Attachment(card), cancellationToken);
+			return Dialog.EndOfTurn; // wait for rating submission
 		}
 
-		private async Task<DialogTurnResult> ProcessRatingAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+		private async Task<DialogTurnResult> ProcessRatingCardAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
 		{
-			var movieName = (string)stepContext.Values["selectedMovie"];
-			var rating = int.Parse((string)stepContext.Result);
-
-			// Get the movie by name to retrieve its Id
-			var movies = await ApiService<List<Movie>>.GetAsync("/movies");
-			var movie = movies.Find(m => m.Name.Equals(movieName, StringComparison.OrdinalIgnoreCase));
-
-			if (movie != null)
+			if (stepContext.Context.Activity.Value is not null)
 			{
-				movie.Rating = rating;
+				try
+				{
+					var submission = stepContext.Context.Activity.Value as dynamic;
+					string movieName = submission.MovieName;
+					int rating = int.Parse((string)submission.Rating);
 
-				// Use movie.Id in the PUT endpoint
-				await ApiService<Movie>.PutAsync($"/movies/{movie.Id}", movie);
-				await stepContext.Context.SendActivityAsync(
-					MessageFactory.Text($"Thanks! You rated **{movieName}** a {rating}/5."), cancellationToken);
+					var movies = await ApiService<List<Movie>>.GetAsync("/movies");
+					var movie = movies.Find(m => m.Name.Equals(movieName, StringComparison.OrdinalIgnoreCase));
+
+					if (movie != null)
+					{
+						movie.Rating = rating;
+						await ApiService<Movie>.PutAsync($"/movies/{movie.Id}", movie);
+
+						var ratingCard = MovieRatingCard.CreateCardAttachment(movieName, rating);
+						await stepContext.Context.SendActivityAsync(MessageFactory.Attachment(ratingCard), cancellationToken);
+					}
+					else
+					{
+						await stepContext.Context.SendActivityAsync(
+							MessageFactory.Text($"Error: Movie {movieName} not found."), cancellationToken);
+					}
+				}
+				catch (Exception ex)
+				{
+					await stepContext.Context.SendActivityAsync(
+						MessageFactory.Text($"Oops! Something went wrong: {ex.Message}"), cancellationToken);
+				}
 			}
 			else
 			{
 				await stepContext.Context.SendActivityAsync(
-					MessageFactory.Text($"Error: Movie {movieName} not found."), cancellationToken);
+					MessageFactory.Text("No rating data received."), cancellationToken);
 			}
 
 			return await stepContext.EndDialogAsync(null, cancellationToken);
 		}
-
 	}
 }

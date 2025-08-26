@@ -1,32 +1,43 @@
 ﻿using AdaptiveCards;
-using CoreBot.Models;
 using Microsoft.Bot.Schema;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace CoreBot.Cards
 {
-	public static class MoviesCard
+	public class MoviesCard
 	{
-		public static Attachment CreateCardAttachment(List<Movie> movies)
+		public static Attachment CreateCardAttachment(List<string> movieNames)
 		{
-			var card = new AdaptiveCard(new AdaptiveSchemaVersion(1, 0))
+			var card = new AdaptiveCard(new AdaptiveSchemaVersion(1, 3))
 			{
 				Body = new List<AdaptiveElement>
 				{
 					new AdaptiveTextBlock
 					{
-						Text = "All movies",
+						Text = "🎬 Please select a movie:",
 						Weight = AdaptiveTextWeight.Bolder,
-						Size = AdaptiveTextSize.Large
+						Size = AdaptiveTextSize.Medium,
+						Wrap = true,
+						Separator = true
 					},
 					new AdaptiveChoiceSetInput
 					{
-						Id = "movieChoice",
+						Id = "selectedMovie",
 						Style = AdaptiveChoiceInputStyle.Compact,
-						Choices = movies.Select(m => new AdaptiveChoice { Title = m.Name, Value = m.Name }).ToList(),
+						Choices = movieNames.ConvertAll(name => new AdaptiveChoice
+						{
+							Title = name,
+							Value = name
+						}),
 						IsMultiSelect = false
+					}
+				},
+				Actions = new List<AdaptiveAction>
+				{
+					new AdaptiveSubmitAction
+					{
+						Title = "✅ Confirm Selection"
 					}
 				}
 			};
