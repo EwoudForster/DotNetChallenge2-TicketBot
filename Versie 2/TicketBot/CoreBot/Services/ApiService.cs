@@ -21,43 +21,45 @@ namespace CoreBot.Services
 			new Movie { Id = 3, Name = "Inception", Rating = 5 }
 		};
 
+		private static List<Schedule> mockSchedules = new List<Schedule>
+		{
+			new Schedule
+			{
+				Id = 1,
+				MovieId = 1,
+				Movie = new Movie { Id = 1, Name = "Avengers: Endgame", Rating = 5 },
+				MovieHallId = 1,
+				MovieHall = new MovieHall { Id = 1, Name = "Theater 1" },
+				Date = DateTime.Today.AddHours(12)
+			},
+			new Schedule
+			{
+				Id = 2,
+				MovieId = 2,
+				Movie = new Movie { Id = 2, Name = "Spider-Man: No Way Home", Rating = 4 },
+				MovieHallId = 2,
+				MovieHall = new MovieHall { Id = 2, Name = "Theater 2" },
+				Date = DateTime.Today.AddHours(15)
+			},
+			new Schedule
+			{
+				Id = 3,
+				MovieId = 3,
+				Movie = new Movie { Id = 3, Name = "Inception", Rating = 5 },
+				MovieHallId = 3,
+				MovieHall = new MovieHall { Id = 3, Name = "Theater 3" },
+				Date = DateTime.Today.AddHours(18).AddMinutes(30)
+			}
+		};
+
+		private static List<Ticket> mockTickets = new List<Ticket>();
+
 		public static async Task<T> GetAsync(string endPoint)
 		{
 			// Dummy data for testing
 			if (typeof(T) == typeof(List<Schedule>))
 			{
-				var dummySchedules = new List<Schedule>
-				{
-					new Schedule
-					{
-						Id = 1,
-						MovieId = 1,
-						Movie = new Movie { Id = 1, Name = "Avengers: Endgame", Rating = 5 },
-						MovieHallId = 1,
-						MovieHall = new MovieHall { Id = 1, Name = "Theater 1" },
-						Date = DateTime.Today.AddHours(12)
-					},
-					new Schedule
-					{
-						Id = 2,
-						MovieId = 2,
-						Movie = new Movie { Id = 2, Name = "Spider-Man: No Way Home", Rating = 4 },
-						MovieHallId = 2,
-						MovieHall = new MovieHall { Id = 2, Name = "Theater 2" },
-						Date = DateTime.Today.AddHours(15)
-					},
-					new Schedule
-					{
-						Id = 3,
-						MovieId = 3,
-						Movie = new Movie { Id = 3, Name = "Inception", Rating = 5 },
-						MovieHallId = 3,
-						MovieHall = new MovieHall { Id = 3, Name = "Theater 3" },
-						Date = DateTime.Today.AddHours(18).AddMinutes(30)
-					}
-				};
-
-				return (T)(object)dummySchedules;
+				return (T)(object)mockSchedules;
 			}
 
 			if (typeof(T) == typeof(List<Movie>))
@@ -72,6 +74,11 @@ namespace CoreBot.Services
 				var name = parts.Length > 2 ? parts[2] : "";
 				var movie = mockMovies.Find(m => m.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 				return (T)(object)movie;
+			}
+
+			if (typeof(T) == typeof(List<Ticket>))
+			{
+				return (T)(object)mockTickets;
 			}
 
 			// Original HTTP request code
@@ -117,6 +124,14 @@ namespace CoreBot.Services
 			{
 				newMovie.Id = mockMovies.Count + 1;
 				mockMovies.Add(newMovie);
+			}
+
+			// Mock behavior: add ticket to list
+			if (data is Ticket newTicket)
+			{
+				newTicket.Id = mockTickets.Count + 1;
+				newTicket.OrderDate = DateTime.Now;
+				mockTickets.Add(newTicket);
 			}
 
 			return Task.CompletedTask;
