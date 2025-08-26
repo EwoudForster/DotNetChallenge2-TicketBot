@@ -10,7 +10,7 @@ namespace CoreBot.Services
 	public static class ApiService<T>
 	{
 		// Change this to your local API URL
-		private static readonly string BASE_URL = "https://localhost:5001/api";
+		private static readonly string BASE_URL = "https://ticketbotapi-hhf7ctdwc6gxckej.westeurope-01.azurewebsites.net/api";
 		private static readonly HttpClient client = new HttpClient() { Timeout = TimeSpan.FromSeconds(60) };
 
 		// ------------------- MOCK DATA (for fallback/testing) -------------------
