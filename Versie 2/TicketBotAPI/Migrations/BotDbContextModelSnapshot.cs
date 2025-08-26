@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TicketBotApi.Data;
 
@@ -15,20 +16,26 @@ namespace TicketBotAPI.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.36");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "6.0.36")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
             modelBuilder.Entity("TicketBotApi.Models.Movie", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Rating")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -59,11 +66,13 @@ namespace TicketBotAPI.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -86,16 +95,18 @@ namespace TicketBotAPI.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("MovieHallId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("MovieId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -109,21 +120,21 @@ namespace TicketBotAPI.Migrations
                         new
                         {
                             Id = 1,
-                            Date = new DateTime(2025, 8, 26, 16, 25, 37, 636, DateTimeKind.Local).AddTicks(383),
+                            Date = new DateTime(2025, 8, 26, 16, 25, 0, 0, DateTimeKind.Unspecified),
                             MovieHallId = 1,
                             MovieId = 1
                         },
                         new
                         {
                             Id = 2,
-                            Date = new DateTime(2025, 8, 26, 18, 25, 37, 636, DateTimeKind.Local).AddTicks(423),
+                            Date = new DateTime(2025, 8, 26, 18, 25, 0, 0, DateTimeKind.Unspecified),
                             MovieHallId = 2,
                             MovieId = 2
                         },
                         new
                         {
                             Id = 3,
-                            Date = new DateTime(2025, 8, 26, 20, 25, 37, 636, DateTimeKind.Local).AddTicks(426),
+                            Date = new DateTime(2025, 8, 26, 20, 25, 0, 0, DateTimeKind.Unspecified),
                             MovieHallId = 1,
                             MovieId = 3
                         });
@@ -133,19 +144,23 @@ namespace TicketBotAPI.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("OrderDate")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("ScheduleId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ScheduleId");
 
                     b.ToTable("Tickets");
                 });
@@ -167,6 +182,17 @@ namespace TicketBotAPI.Migrations
                     b.Navigation("Movie");
 
                     b.Navigation("MovieHall");
+                });
+
+            modelBuilder.Entity("TicketBotApi.Models.Ticket", b =>
+                {
+                    b.HasOne("TicketBotApi.Models.Schedule", "Schedule")
+                        .WithMany()
+                        .HasForeignKey("ScheduleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Schedule");
                 });
 #pragma warning restore 612, 618
         }
