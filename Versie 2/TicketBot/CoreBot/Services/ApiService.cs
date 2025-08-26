@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using CoreBot.Models;
 using Newtonsoft.Json;
 
 namespace CoreBot.Services
@@ -65,36 +64,41 @@ namespace CoreBot.Services
 			}
 		}
 
-		public static async Task PostAsync(string endPoint, T data)
+		public static async Task<T> PostAsync(string endPoint, object data)
 		{
-			try
+			var json = JsonConvert.SerializeObject(data, new JsonSerializerSettings
 			{
-				var json = JsonConvert.SerializeObject(data);
-				var content = new StringContent(json, Encoding.UTF8, "application/json");
-				var response = await client.PostAsync(BASE_URL + endPoint, content);
-				response.EnsureSuccessStatusCode();
-			}
-			catch (Exception ex)
-			{
-				// Optional: fallback to mock data
-				// if (data is Movie newMovie) mockMovies.Add(newMovie);
-				throw new Exception("POST request failed: " + ex.Message, ex);
-			}
+				ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
+			});
+			var content = new StringContent(json, Encoding.UTF8, "application/json");
+			var response = await client.PostAsync(BASE_URL + endPoint, content);
+
+			response.EnsureSuccessStatusCode();
+
+			var jsonData = await response.Content.ReadAsStringAsync();
+			return JsonConvert.DeserializeObject<T>(jsonData);
 		}
+
 
 		public static async Task PutAsync(string endPoint, T data)
 		{
 			try
 			{
-				var json = JsonConvert.SerializeObject(data);
+				var json = JsonConvert.SerializeObject(data, new JsonSerializerSettings
+				{
+					ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
+				});
 				var content = new StringContent(json, Encoding.UTF8, "application/json");
 				var response = await client.PutAsync(BASE_URL + endPoint, content);
-				response.EnsureSuccessStatusCode();
+
+				if (!response.IsSuccessStatusCode)
+				{
+					var errorContent = await response.Content.ReadAsStringAsync();
+					throw new Exception($"PUT request failed ({response.StatusCode}): {errorContent}");
+				}
 			}
 			catch (Exception ex)
 			{
-				// Optional: fallback to mock data
-				// if (data is Movie updatedMovie) { ... }
 				throw new Exception("PUT request failed: " + ex.Message, ex);
 			}
 		}
@@ -104,12 +108,15 @@ namespace CoreBot.Services
 			try
 			{
 				var response = await client.DeleteAsync(BASE_URL + endPoint);
-				response.EnsureSuccessStatusCode();
+
+				if (!response.IsSuccessStatusCode)
+				{
+					var errorContent = await response.Content.ReadAsStringAsync();
+					throw new Exception($"DELETE request failed ({response.StatusCode}): {errorContent}");
+				}
 			}
 			catch (Exception ex)
 			{
-				// Optional: fallback to mock data
-				// Remove from mockMovies if needed
 				throw new Exception("DELETE request failed: " + ex.Message, ex);
 			}
 		}

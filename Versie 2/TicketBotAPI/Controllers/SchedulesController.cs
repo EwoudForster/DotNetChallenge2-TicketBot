@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CoreBot.Repositories;
-using System.Collections.Generic;
 using TicketBotApi.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CoreBot.Controllers
 {
@@ -17,49 +18,36 @@ namespace CoreBot.Controllers
 		}
 
 		[HttpGet]
-		public ActionResult<List<Schedule>> GetAll() => _repository.GetAll();
+		public async Task<ActionResult<List<Schedule>>> GetAll() =>
+			await _repository.GetAllAsync();
 
 		[HttpGet("{id}")]
-		public ActionResult<Schedule> GetById(int id)
+		public async Task<ActionResult<Schedule>> GetById(int id)
 		{
-			var schedule = _repository.GetById(id);
+			var schedule = await _repository.GetByIdAsync(id);
 			if (schedule == null) return NotFound();
 			return schedule;
 		}
 
 		[HttpPost]
-		public IActionResult Post([FromBody] ScheduleDto dto)
+		public async Task<ActionResult<Schedule>> Add(Schedule schedule)
 		{
-			var schedule = new Schedule
-			{
-				MovieId = dto.MovieId,
-				MovieHallId = dto.MovieHallId,
-				Date = dto.Date
-			};
-
-			_repository.Add(schedule);
-			return CreatedAtAction(nameof(GetById), new { id = schedule.Id }, schedule);
+			var created = await _repository.AddAsync(schedule);
+			return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
 		}
 
-
 		[HttpPut("{id}")]
-		public IActionResult Put(int id, [FromBody] ScheduleDto dto)
+		public async Task<IActionResult> Update(int id, Schedule schedule)
 		{
-			var existing = _repository.GetById(id);
-			if (existing == null) return NotFound();
-
-			existing.MovieId = dto.MovieId;
-			existing.MovieHallId = dto.MovieHallId;
-			existing.Date = dto.Date;
-
-			_repository.Update(existing);
+			if (id != schedule.Id) return BadRequest();
+			await _repository.UpdateAsync(schedule);
 			return NoContent();
 		}
 
 		[HttpDelete("{id}")]
-		public IActionResult Delete(int id)
+		public async Task<IActionResult> Delete(int id)
 		{
-			_repository.Delete(id);
+			await _repository.DeleteAsync(id);
 			return NoContent();
 		}
 	}

@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CoreBot.Repositories;
-using System.Collections.Generic;
 using TicketBotApi.Models;
+using TicketBotApi.Data;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace CoreBot.Controllers
 {
@@ -10,6 +13,7 @@ namespace CoreBot.Controllers
 	public class TicketsController : ControllerBase
 	{
 		private readonly ITicketRepository _repository;
+		private readonly BotDbContext _context;
 
 		public TicketsController(ITicketRepository repository)
 		{
@@ -17,35 +21,47 @@ namespace CoreBot.Controllers
 		}
 
 		[HttpGet]
-		public ActionResult<List<Ticket>> GetAll() => _repository.GetAll();
+		public async Task<ActionResult<List<Ticket>>> GetAll() =>
+			await _repository.GetAllAsync();
 
 		[HttpGet("{id}")]
-		public ActionResult<Ticket> GetById(int id)
+		public async Task<ActionResult<Ticket>> GetById(int id)
 		{
-			var ticket = _repository.GetById(id);
+			var ticket = await _repository.GetByIdAsync(id);
 			if (ticket == null) return NotFound();
 			return ticket;
 		}
-
 		[HttpPost]
-		public ActionResult<Ticket> Add(Ticket ticket)
+		public async Task<IActionResult> PostTicket([FromBody] TicketCreateDto dto)
 		{
-			var created = _repository.Add(ticket);
-			return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+			if (!ModelState.IsValid)
+				return BadRequest(ModelState);
+
+			var ticket = new Ticket
+			{
+				CustomerName = dto.CustomerName,
+				ScheduleId = dto.ScheduleId,
+				OrderDate = DateTime.UtcNow
+			};
+
+			var addedTicket = await _repository.AddAsync(ticket);
+
+			return CreatedAtAction(nameof(GetById), new { id = addedTicket.Id }, addedTicket);
 		}
 
+
 		[HttpPut("{id}")]
-		public IActionResult Update(int id, Ticket ticket)
+		public async Task<IActionResult> Update(int id, Ticket ticket)
 		{
 			if (id != ticket.Id) return BadRequest();
-			_repository.Update(ticket);
+			await _repository.UpdateAsync(ticket);
 			return NoContent();
 		}
 
 		[HttpDelete("{id}")]
-		public IActionResult Delete(int id)
+		public async Task<IActionResult> Delete(int id)
 		{
-			_repository.Delete(id);
+			await _repository.DeleteAsync(id);
 			return NoContent();
 		}
 	}

@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CoreBot.Repositories;
-using System.Collections.Generic;
 using TicketBotApi.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CoreBot.Controllers
 {
@@ -17,35 +18,36 @@ namespace CoreBot.Controllers
 		}
 
 		[HttpGet]
-		public ActionResult<List<MovieHall>> GetAll() => _repository.GetAll();
+		public async Task<ActionResult<List<MovieHall>>> GetAll() =>
+			await _repository.GetAllAsync();
 
 		[HttpGet("{id}")]
-		public ActionResult<MovieHall> GetById(int id)
+		public async Task<ActionResult<MovieHall>> GetById(int id)
 		{
-			var hall = _repository.GetById(id);
+			var hall = await _repository.GetByIdAsync(id);
 			if (hall == null) return NotFound();
 			return hall;
 		}
 
 		[HttpPost]
-		public ActionResult<MovieHall> Add(MovieHall hall)
+		public async Task<ActionResult<MovieHall>> Add(MovieHall hall)
 		{
-			var created = _repository.Add(hall);
+			var created = await _repository.AddAsync(hall);
 			return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
 		}
 
 		[HttpPut("{id}")]
-		public IActionResult Update(int id, MovieHall hall)
+		public async Task<IActionResult> Update(int id, MovieHall hall)
 		{
 			if (id != hall.Id) return BadRequest();
-			_repository.Update(hall);
+			await _repository.UpdateAsync(hall);
 			return NoContent();
 		}
 
 		[HttpDelete("{id}")]
-		public IActionResult Delete(int id)
+		public async Task<IActionResult> Delete(int id)
 		{
-			_repository.Delete(id);
+			await _repository.DeleteAsync(id);
 			return NoContent();
 		}
 	}

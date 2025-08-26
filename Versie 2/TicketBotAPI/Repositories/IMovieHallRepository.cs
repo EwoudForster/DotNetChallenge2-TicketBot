@@ -1,15 +1,15 @@
-﻿// Repositories/IMovieHallRepository.cs
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using TicketBotApi.Models;
 
 namespace CoreBot.Repositories
 {
 	public interface IMovieHallRepository
 	{
-		List<MovieHall> GetAll();
-		MovieHall GetById(int id);
-		MovieHall Add(MovieHall hall);
-		void Update(MovieHall hall);
-		void Delete(int id);
+		Task<List<MovieHall>> GetAllAsync();
+		Task<MovieHall> GetByIdAsync(int id);
+		Task<MovieHall> AddAsync(MovieHall hall);
+		Task UpdateAsync(MovieHall hall);
+		Task DeleteAsync(int id);
 	}
 }

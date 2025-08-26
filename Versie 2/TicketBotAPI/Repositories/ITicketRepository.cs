@@ -1,15 +1,15 @@
-﻿// Repositories/ITicketRepository.cs
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using TicketBotApi.Models;
 
 namespace CoreBot.Repositories
 {
 	public interface ITicketRepository
 	{
-		List<Ticket> GetAll();
-		Ticket GetById(int id);
-		Ticket Add(Ticket ticket);
-		void Update(Ticket ticket);
-		void Delete(int id);
+		Task<List<Ticket>> GetAllAsync();
+		Task<Ticket> GetByIdAsync(int id);
+		Task<Ticket> AddAsync(Ticket ticket);
+		Task UpdateAsync(Ticket ticket);
+		Task DeleteAsync(int id);
 	}
 }

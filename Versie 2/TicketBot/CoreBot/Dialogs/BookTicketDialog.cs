@@ -125,16 +125,18 @@ namespace CoreBot.Dialogs
 				return await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
 			}
 
-			var ticket = new Ticket
+			// Post the ticket DTO and get back the created Ticket from API
+			var ticketDto = new TicketCreateDto
 			{
 				CustomerName = userName,
-				ScheduleId = schedule.Id,
-				OrderDate = DateTime.UtcNow
+				ScheduleId = schedule.Id
 			};
 
-			await ApiService<Ticket>.PostAsync("/tickets", ticket); // API call
+			// Change ApiService call to return the created Ticket
+			var createdTicket = await ApiService<Ticket>.PostAsync("/tickets", ticketDto);
 
-			var ticketCard = TicketCard.CreateTicketCard(ticket);
+			// Send ticket card
+			var ticketCard = TicketCard.CreateTicketCard(createdTicket);
 			await stepContext.Context.SendActivityAsync(MessageFactory.Attachment(ticketCard), cancellationToken);
 
 			return await stepContext.EndDialogAsync(cancellationToken: cancellationToken);

@@ -1,12 +1,18 @@
+using TicketBotApi.Data;
 using CoreBot.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddSingleton<IMovieRepository, InMemoryMovieRepository>();
-builder.Services.AddSingleton<IMovieHallRepository, InMemoryMovieHallRepository>();
-builder.Services.AddSingleton<IScheduleRepository, InMemoryScheduleRepository>();
-builder.Services.AddSingleton<ITicketRepository, InMemoryTicketRepository>();
+builder.Services.AddDbContext<BotDbContext>(options =>
+	options.UseSqlite("Data Source=bot.db"));
+
+// Replace in-memory repositories with database repositories
+builder.Services.AddScoped<IMovieRepository, DatabaseMovieRepository>();
+builder.Services.AddScoped<IMovieHallRepository, DatabaseMovieHallRepository>();
+builder.Services.AddScoped<IScheduleRepository, DatabaseScheduleRepository>();
+builder.Services.AddScoped<ITicketRepository, DatabaseTicketRepository>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
