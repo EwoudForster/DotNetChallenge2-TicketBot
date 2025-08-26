@@ -14,7 +14,6 @@ namespace CoreBot.Dialogs
 	{
 		public RatingDialog() : base(nameof(RatingDialog))
 		{
-			// Add necessary prompts
 			AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
 			AddDialog(new TextPrompt(nameof(TextPrompt)));
 
@@ -27,21 +26,14 @@ namespace CoreBot.Dialogs
 			};
 
 			AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
-
 			InitialDialogId = nameof(WaterfallDialog);
 		}
 
 		private async Task<DialogTurnResult> AskForMovieAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
 		{
-			// Get dummy movies
-			var movies = await ApiService<List<Movie>>.GetAsync("/movie");
+			var movies = await ApiService<List<Movie>>.GetAsync("/movies"); // API call
 
-			// Create choices for the user
-			var choices = new List<Choice>();
-			foreach (var m in movies)
-			{
-				choices.Add(new Choice(m.Name));
-			}
+			var choices = movies.ConvertAll(m => new Choice(m.Name));
 
 			return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
 			{
@@ -56,8 +48,7 @@ namespace CoreBot.Dialogs
 			var selectedMovie = ((FoundChoice)stepContext.Result).Value;
 			stepContext.Values["selectedMovie"] = selectedMovie;
 
-			await stepContext.Context.SendActivityAsync(
-				MessageFactory.Text($"You selected: {selectedMovie}"), cancellationToken);
+			await stepContext.Context.SendActivityAsync(MessageFactory.Text($"You selected: {selectedMovie}"), cancellationToken);
 
 			return await stepContext.NextAsync(null, cancellationToken);
 		}
@@ -77,13 +68,27 @@ namespace CoreBot.Dialogs
 			var movieName = (string)stepContext.Values["selectedMovie"];
 			var rating = int.Parse((string)stepContext.Result);
 
-			// Mock update
-			await ApiService<Movie>.PutAsync($"/movie/{movieName}", new Movie { Name = movieName, Rating = rating });
+			// Get the movie by name to retrieve its Id
+			var movies = await ApiService<List<Movie>>.GetAsync("/movies");
+			var movie = movies.Find(m => m.Name.Equals(movieName, StringComparison.OrdinalIgnoreCase));
 
-			await stepContext.Context.SendActivityAsync(
-				MessageFactory.Text($"Thanks! You rated **{movieName}** a {rating}/5."), cancellationToken);
+			if (movie != null)
+			{
+				movie.Rating = rating;
+
+				// Use movie.Id in the PUT endpoint
+				await ApiService<Movie>.PutAsync($"/movies/{movie.Id}", movie);
+				await stepContext.Context.SendActivityAsync(
+					MessageFactory.Text($"Thanks! You rated **{movieName}** a {rating}/5."), cancellationToken);
+			}
+			else
+			{
+				await stepContext.Context.SendActivityAsync(
+					MessageFactory.Text($"Error: Movie {movieName} not found."), cancellationToken);
+			}
 
 			return await stepContext.EndDialogAsync(null, cancellationToken);
 		}
+
 	}
 }

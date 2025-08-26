@@ -37,7 +37,7 @@ namespace CoreBot.Dialogs
 
 		private async Task<DialogTurnResult> AskMovieAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
 		{
-			var movies = await ApiService<List<Movie>>.GetAsync("/movie");
+			var movies = await ApiService<List<Movie>>.GetAsync("/movies"); // API call
 
 			var choices = movies.Select(m => new Choice(m.Name)).ToList();
 
@@ -62,7 +62,7 @@ namespace CoreBot.Dialogs
 		{
 			var selectedMovie = (string)stepContext.Values["selectedMovie"];
 
-			var schedules = await ApiService<List<Schedule>>.GetAsync("/schedule");
+			var schedules = await ApiService<List<Schedule>>.GetAsync("/schedules"); // API call
 			var movieHalls = schedules
 				.Where(s => s.Movie.Name.Equals(selectedMovie, StringComparison.OrdinalIgnoreCase))
 				.Select(s => s.MovieHall.Name)
@@ -112,8 +112,7 @@ namespace CoreBot.Dialogs
 			var selectedMovie = (string)stepContext.Values["selectedMovie"];
 			var selectedHall = (string)stepContext.Values["selectedMovieHall"];
 
-			// Find the matching schedule
-			var schedules = await ApiService<List<Schedule>>.GetAsync("/schedule");
+			var schedules = await ApiService<List<Schedule>>.GetAsync("/schedules"); // API call
 			var schedule = schedules.FirstOrDefault(s =>
 				s.Movie.Name.Equals(selectedMovie, StringComparison.OrdinalIgnoreCase) &&
 				s.MovieHall.Name.Equals(selectedHall, StringComparison.OrdinalIgnoreCase));
@@ -131,7 +130,7 @@ namespace CoreBot.Dialogs
 				OrderDate = DateTime.UtcNow
 			};
 
-			await ApiService<Ticket>.PostAsync("/ticket", ticket);
+			await ApiService<Ticket>.PostAsync("/tickets", ticket); // API call
 
 			var ticketCard = TicketCard.CreateTicketCard(ticket);
 			await stepContext.Context.SendActivityAsync(MessageFactory.Attachment(ticketCard), cancellationToken);
