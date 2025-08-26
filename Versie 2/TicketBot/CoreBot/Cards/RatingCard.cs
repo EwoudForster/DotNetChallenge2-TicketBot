@@ -12,42 +12,28 @@ namespace CoreBot.Cards
 			var card = new AdaptiveCard(new AdaptiveSchemaVersion(1, 0))
 			{
 				Body = new List<AdaptiveElement>
-		{
-			new AdaptiveTextBlock
-			{
-				Text = $"Rate your experience with the movie: {movieName}",
-				Weight = AdaptiveTextWeight.Bolder,
-				Size = AdaptiveTextSize.Large,
-				Wrap = true
-			},
-			new AdaptiveTextBlock
-			{
-				Text = "How would you rate this movie on a scale of 1 to 5?",
-				Wrap = true
-			},
-			new AdaptiveChoiceSetInput
-			{
-				Id = "rating", // The ID used to retrieve this input
-                Style = AdaptiveChoiceInputStyle.Compact,
-				Choices = new List<AdaptiveChoice>
 				{
-					new AdaptiveChoice { Title = "1", Value = "1" },
-					new AdaptiveChoice { Title = "2", Value = "2" },
-					new AdaptiveChoice { Title = "3", Value = "3" },
-					new AdaptiveChoice { Title = "4", Value = "4" },
-					new AdaptiveChoice { Title = "5", Value = "5" }
+					new AdaptiveTextBlock
+					{
+						Text = $"Rate your experience with the movie: {movieName}",
+						Weight = AdaptiveTextWeight.Bolder,
+						Size = AdaptiveTextSize.Large,
+						Wrap = true
+					},
+					new AdaptiveTextBlock
+					{
+						Text = "Click the number of stars to rate this movie:",
+						Wrap = true
+					}
 				},
-				IsMultiSelect = false
-			},
-		},
 				Actions = new List<AdaptiveAction>
-		{
-			new AdaptiveSubmitAction
-			{
-				Title = "Submit",
-				Data = new { MovieName = movieName } // Pass the movie name back with the submission
-            }
-		}
+				{
+					new AdaptiveSubmitAction { Title = "⭐ 1", Data = new { MovieName = movieName, Rating = "1" } },
+					new AdaptiveSubmitAction { Title = "⭐⭐ 2", Data = new { MovieName = movieName, Rating = "2" } },
+					new AdaptiveSubmitAction { Title = "⭐⭐⭐ 3", Data = new { MovieName = movieName, Rating = "3" } },
+					new AdaptiveSubmitAction { Title = "⭐⭐⭐⭐ 4", Data = new { MovieName = movieName, Rating = "4" } },
+					new AdaptiveSubmitAction { Title = "⭐⭐⭐⭐⭐ 5", Data = new { MovieName = movieName, Rating = "5" } }
+				}
 			};
 
 			return new Attachment
@@ -56,6 +42,5 @@ namespace CoreBot.Cards
 				Content = JObject.FromObject(card)
 			};
 		}
-
 	}
 }
